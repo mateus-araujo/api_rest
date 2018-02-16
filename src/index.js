@@ -12,32 +12,40 @@ import {
   View,
   Button,
   AsyncStorage,
+  Alert,
 } from 'react-native';
 import api from './services/api';
 import './ReactotronConfig';
+import Reactotron from 'reactotron-react-native';
 
 export default class App extends Component {
   state = {
-    errorMessage: null,
+    loggedInUser: null,
+    errorMessage: '',
   };
 
   signIn = async () => {
     try {
       const response = await api.post('/auth/authenticate', {
         email: 'rb.mateus.araujo@gmail.com',
-        password: '12345677',
+        password: '1234567',
       });
 
-      console.log(response);
+      Reactotron.log(response);
 
-      const { user, token } = response.data;
+      const { token, user } = response.data;
 
       await AsyncStorage.multiSet([
         ['@CodeApi:token', token],
         ['@CodeApi:user', JSON.stringify(user)],
       ]);
-    } catch (response) {
-      this.setState({ errorMessage: response.data.error });
+
+      this.setState({ loggedInUser: user });
+
+      Alert.alert('Logado com sucesso!');
+    } catch (err) {
+      Reactotron.log(err);
+      this.setState({ errorMessage: 'Erro!' });
     }
   };
 
